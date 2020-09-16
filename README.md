@@ -10,7 +10,6 @@ A Powercord plugin that automatically punctuates, capitalizes, and spellchecks y
 ## Note
 If the plugin doesn't work make sure you have the settings you want enabled in the settings page and the button in the chatbar is green. If it still doesn't work navigate to `[PC HOME DIR]/powercord/settings/grammar-nazi.json` open the file with a text editor and reload discord.
 
-## Issues & Suggestions
-Feel free to suggest ideas or label issues in this repo!
-
-Alternatively you can contact me at: Swishilicous#3200
+### Disclaimer
+This is a maintained fork of the original repo from the author in git history.
+New features will not be added, but will continue to keep repository updated against an deprecation issues from PC. 
