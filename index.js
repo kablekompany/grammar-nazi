@@ -1,65 +1,182 @@
-const { Plugin } = require("powercord/entities");
-const { inject, uninject } = require("powercord/injector");
-const { getModule } = require("powercord/webpack");
+const { Plugin } = require('powercord/entities')
+const { inject, uninject } = require('powercord/injector')
+const { React, getModule, messages } = require('powercord/webpack')
+const { findInReactTree } = require('powercord/util')
+const { receiveMessage } = messages
+const ChannelTextAreaContainer = getModule((m) => m.type && m.type.render && m.type.render.displayName === 'ChannelTextAreaContainer', false)
+
+const Settings = require('./components/Settings')
+const spellButton = require('./components/ToggleButton')
 
 module.exports = class GrammarNazi extends Plugin {
-	constructor() {
-		super();
-	}
+    async startPlugin() {
+    powercord.api.settings.registerSettings('grammar-nazi', {
+			category: this.entityID,
+			label: 'Grammar Nazi',
+			render: Settings
+    })
+    powercord.api.commands.registerCommand({
+      command: 'naziadd',
+      aliases: ['na', 'spelladd', 'sa', 'dictadd', 'da'],
+			description: 'Add a key/value pair to the custom dictionary.',
+			usage: '{c} "key" "value"', 
+			executor: (args) => this.addDict(args)
+    })
+    powercord.api.commands.registerCommand({
+      command: 'naziremove',
+      aliases: ['nr', 'spellremove', 'sr', 'dictremove', 'dr'],
+			description: 'Remove a key/value pair from the custom dictionary.',
+			usage: '{c} "key"', 
+			executor: (args) => this.removeDict(args)
+		})
+		powercord.api.commands.registerCommand({
+      command: 'meinkampf',
+      aliases: ['mk', 'nazidictionary', 'nd', 'dictionary'],
+			description: 'View the current custom dictionary.',
+			usage: '{c}', 
+			executor: () => this.viewDict()
+    })
 
-	async startPlugin() {
-		this.inject();
-	}
+    /* Stylesheet */
+    this.loadStylesheet("style.scss")
 
-	async inject() {
-		const MessageEvents = await getModule(["sendMessage"]);
-		inject("send.", MessageEvents, "sendMessage", function (args) {
-			let text = args[1].content.trim();
-			var question = false;
-			var apoth = false;
-			var textBeg = text.slice(0,6);
-			const questionWords = ['who', 'what', 'when', 'where', 'why', 'how', 'can i'];
-			const apothWords = ['doesnt', 'cant', 'wont', 'dont', 'ive', 'id', 'im', 'shes', 'hes', 'its', 'theres', 'theyre', 'youve', 'youre', 'couldnt', 'shouldnt', 'wouldnt', 'lets'];
-            // Detect if message is a question
-			for(let k = 0; k < questionWords.length; k++){				
-				question = (textBeg.includes(questionWords[k])) ? true : false;
-				if(question){
-				  break;
-				}
-			  }
-			// Detect if message has apothWords	  
-			for(let k = 0; k < apothWords.length; k++){
-				apoth = (text.includes(apothWords[k])) ? true : false;
-				text = text.replace(/ doesnt /g, " doesn't ").replace(/ cant /g, " can't ").replace(/ wont /g, " won't ").replace(/ dont /g, " don't ").replace(/ ive /g, " I've ").replace(/ id /g, " I'd ").replace(/ im /g, " I'm ").replace(/ shes /g, " she's ").replace(/ hes /g, " he's ").replace(/ its /g, " it's ").replace(/ theres /g, " there's ").replace(/ theyre /g, " they're ").replace(/ youve /g, " you've ").replace(/ youre /g, " you're ").replace(/ couldnt /g, " couldn't ").replace(/ shouldnt /g, " shouldn't ").replace(/ wouldnt /g, " wouldn't ").replace(/ lets /g, " let's "); //lmao wtf is this line t-t
-				if(apoth){
-				  break;
-				}
-			  }
+    /* Define Settings */
+    if (this.settings.get('customDictionary') === undefined) this.settings.set('customDictionary', {})
+    let settingsArray = ['punctuation', 'capitalization', 'dictionary', 'nazify']
+    for (let i = 0; i < settingsArray.length; i++) {
+      if (this.settings.get(settingsArray[i]) === undefined) this.settings.set(settingsArray[i], false)
+    }
 
-			if (text.slice(0,8) == "https://" || text.slice(0,7) == "http://") { // Message Link Detection
-			} else if(text.slice(0,3) == "```") { // Code Block Detection
-			} else if(question == true) {
-				text = text.charAt(0).toUpperCase() + text.slice(1) + '?';
-				text = text.replace(/ i /g, " I ");
-				if (text.slice(text.length-2) == "i?") { 
-					text = text.slice(0,text.length-2) + "I?"; // Correct sentences like "Who am I?"
-				} 
-            } else {
-                // Forces Capital Letters
-                text = text.charAt(0).toUpperCase() + text.slice(1);
-                // Forces Punctuation
-                text = (text[text.length - 1] == "!" || text[text.length - 1] == "?" || text[text.length - 1] == ".") ?  text : text + '.';
-                // Forces Upercase "I"s
-				text = text.replace(/ i /g, " I ");
-            }
+    /* Inject on Message Send */
+    const MessageEvents = await getModule(['sendMessage'])
+		inject('message-send', MessageEvents, 'sendMessage', (args) => {
+      let text = args[1].content.trim()
+      let split = text.split(' ')
+      let customDictionary = this.settings.get('customDictionary')
 
-			args[1].content = text;
-            return args;
+      if (text.indexOf('```') === -1 && this.settings.get('nazify') === true) {
+      if (this.settings.get('dictionary')) text = split.map(c => c in customDictionary ? customDictionary[c] : c).join(' ')
+      if (this.settings.get('punctuation') && (/[a-z0-9]$/gmi).test(text) && split[split.length-1].indexOf('http') === -1 ) text += '.'
+      if (this.settings.get('capitalization') && text.indexOf('http') != 0) text = text.charAt(0).toUpperCase() + text.substring(1)}
 
-		}, true);
-	}
+      args[1].content = text
+      return args
+    }, true)
 
-	pluginWillUnload() {
-		uninject("send.");
-	}
-};
+    /* Inject Chat Button */
+    inject('toggle-button', ChannelTextAreaContainer.type, 'render', (args, res) => {
+		  const props = findInReactTree(res, (r) => r && r.className && r.className.indexOf('buttons-') == 0)
+		  props.children.unshift(React.createElement('div', {
+        className: '.toggle-button',
+        onClick: () => this.settings.set('nazify', this.settings.get('nazify') === false ? true : false)
+      }, React.createElement(spellButton, { nazify: this.settings.get('nazify') })))
+		  return res
+		})
+    ChannelTextAreaContainer.type.render.displayName = 'ChannelTextAreaContainer'
+}
+
+    pluginWillUnload() {
+      powercord.api.settings.unregisterSettings('grammar-nazi')
+      powercord.api.commands.unregisterCommand('naziadd')
+      powercord.api.commands.unregisterCommand('naziremove')
+	    powercord.api.commands.unregisterCommand('meinkampf')
+      uninject('message-send')
+      uninject('toggle-button')
+      document.querySelectorAll('.toggle-button').forEach(e => e.style.display = 'none')
+    }
+
+    async addDict(args) {
+      /* Custom Bot Attributes */
+      const { BOT_AVATARS } = await getModule(['BOT_AVATARS'])
+      const { createBotMessage } = await getModule(['createBotMessage'])
+      const { getChannelId } = getModule(['getLastSelectedChannelId'], false)
+        
+      const receivedMessage = createBotMessage(getChannelId(), {})
+        
+      BOT_AVATARS.GrammarNaziAvatar = 'https://i.imgur.com/wUcHvh0.png'
+      receivedMessage.author.username = 'Grammar Nazi'
+      receivedMessage.author.avatar = 'GrammarNaziAvatar'
+
+      /* String Formatting */
+      let newargs = []
+      let text = args.join(' ')
+      newargs[0] = text.substring(0, text.indexOf('" "')).replace(/"/g, '')
+      newargs[1] = text.substring(text.indexOf('" "') + 2, text.length).replace(/"/g, '')
+      if (newargs[0].length < 1 || newargs[1] == ' ') {
+        receivedMessage.content = 'Insufficent arguments; both a keyword and value must be supplied.'
+        return receiveMessage(receivedMessage.channel_id, receivedMessage)
+      }
+        
+      /* Duplicate Check */
+      let customDictionary = this.settings.get('customDictionary')
+      if (newargs[0] in customDictionary) {
+        receivedMessage.content = `Entry "${newargs[0]}" already exists!`
+        return receiveMessage(receivedMessage.channel_id, receivedMessage)
+      }
+
+      /* Save to Dictionary */
+      customDictionary[newargs[0]] = newargs[1]
+      this.settings.set('customDictionary', customDictionary)
+
+      receivedMessage.content = `Entry "${newargs[0]}" successfully created with value of "${newargs[1]}".`
+      return receiveMessage(receivedMessage.channel_id, receivedMessage)
+    }
+
+    async removeDict(args) {
+      /* Custom Bot Attributes */
+      const { BOT_AVATARS } = await getModule(['BOT_AVATARS'])
+      const { createBotMessage } = await getModule(['createBotMessage'])
+      const { getChannelId } = getModule(['getLastSelectedChannelId'], false)
+
+      const receivedMessage = createBotMessage(getChannelId(), {})
+
+      BOT_AVATARS.GrammarNaziAvatar = 'https://i.imgur.com/wUcHvh0.png'
+      receivedMessage.author.username = 'Grammar Nazi'
+      receivedMessage.author.avatar = 'GrammarNaziAvatar'
+
+      /* String Formatting */
+      let customDictionary = this.settings.get('customDictionary')
+      let text = args.join(' ').replace(/"/gm, '')
+
+      /* Arguments Check */
+      if (!(args.join(' ').includes('"'))) {
+        receivedMessage.content = 'Insufficent arguments; please provide both a keyword and a value.'
+        return receiveMessage(receivedMessage.channel_id, receivedMessage)
+      }
+
+      /* Remove from Dictionary */
+      if (text in customDictionary) {
+        delete customDictionary[text]
+        this.settings.set('customDictionary', customDictionary)
+        receivedMessage.content = `Entry ${args[0]} was successfully deleted!`
+        return receiveMessage(receivedMessage.channel_id, receivedMessage)
+      } else {
+        receivedMessage.content = `Entry ${args[0]} does not exist.`
+        return receiveMessage(receivedMessage.channel_id, receivedMessage)
+      }
+    }
+    
+	  async viewDict() {
+      /* Custom Bot Attributes */
+      const { BOT_AVATARS } = await getModule(['BOT_AVATARS'])
+      const { createBotMessage } = await getModule(['createBotMessage'])
+      const { getChannelId } = getModule(['getLastSelectedChannelId'], false)
+
+      const receivedMessage = createBotMessage(getChannelId(), {})
+
+      BOT_AVATARS.GrammarNaziAvatar = 'https://i.imgur.com/wUcHvh0.png'
+      receivedMessage.author.username = 'Grammar Nazi'
+      receivedMessage.author.avatar = 'GrammarNaziAvatar'
+
+      /* Write Message */
+      let customDictionary = this.settings.get('customDictionary')
+      let dictionary = '> '
+
+      for (let i in customDictionary) {
+        dictionary += i + ' : ' + customDictionary[i] + '\n> '
+      }
+
+      receivedMessage.content = dictionary
+      return receiveMessage(receivedMessage.channel_id, receivedMessage)
+    }
+}

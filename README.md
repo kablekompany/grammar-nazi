@@ -1,20 +1,16 @@
 # grammar-nazi
-A powercord plugin that forces you to use semi-correct grammar.
+A Powercord plugin that automatically punctuates, capitalizes, and spellchecks your sentences.
 
 ## Features
-* Capitalize the first letter of every message.
-* Always add punctuation at the end.
-* Always capitalize lowercase 'i's when they are on their own.
+* Capitalizes the first letter of every sentence.
+* Adds proper punctuation at the end of every sentence.
+* Customizable dictionary interactable through chat commands.
+* A button in the channel area container to quickly toggle.
 
-## Done:
-* Ignore links.
-* Ignore code brackets.
-* Autocorrect words that contain apostrophes. (Like I'm and Doesn't)
-* Certain words automatically add a question mark at the end.
+## Note
+If the plugin doesn't work make sure you have the settings you want enabled in the settings page and the button in the chatbar is green. If it still doesn't work navigate to `[PC HOME DIR]/powercord/settings/grammar-nazi.json` open the file with a text editor and reload discord.
 
-## To Do:
-* Add options to disable each individual setting.
-* Correct grammar when dealing with linebreaks.
-* Correct messages when embedding an image.
-* General library of words to autocorrect.
-* Ability to make a personal library of words to autocorrect.
+## Issues & Suggestions
+Feel free to suggest ideas or label issues in this repo!
+
+Alternatively you can contact me at: Swishilicous#3200
