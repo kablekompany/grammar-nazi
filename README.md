@@ -12,4 +12,4 @@ If the plugin doesn't work make sure you have the settings you want enabled in t
 
 ### Disclaimer
 This is a maintained fork of the original repo from the author in git history.
-New features will not be added, but will continue to keep repository updated against an deprecation issues from PC. 
+New features will not be added, but will continue to keep repository updated against any deprecation issues from PC. 
