@@ -67,7 +67,7 @@ module.exports = class GrammarNazi extends Plugin {
     inject('toggle-button', ChannelTextAreaContainer.type, 'render', (args, res) => {
 		  const props = findInReactTree(res, (r) => r && r.className && r.className.indexOf('buttons-') == 0)
 		  props.children.unshift(React.createElement('div', {
-        className: '.toggle-button',
+        className: 'toggle-button',
         onClick: () => this.settings.set('nazify', this.settings.get('nazify') === false ? true : false)
       }, React.createElement(spellButton, { nazify: this.settings.get('nazify') })))
 		  return res
