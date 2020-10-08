@@ -42,6 +42,7 @@ module.exports = class GrammarNazi extends Plugin {
 
     /* Define Settings */
     if (this.settings.get('customDictionary') === undefined) this.settings.set('customDictionary', {})
+    if (this.settings.get('ignorebotcommands') === undefined) this.settings.set('ignorebotcommands', [])
     let settingsArray = ['punctuation', 'capitalization', 'dictionary', 'nazify']
     for (let i = 0; i < settingsArray.length; i++) {
       if (this.settings.get(settingsArray[i]) === undefined) this.settings.set(settingsArray[i], false)
@@ -53,8 +54,9 @@ module.exports = class GrammarNazi extends Plugin {
       let text = args[1].content.trim()
       let split = text.split(' ')
       let customDictionary = this.settings.get('customDictionary')
+      let ignoreBotCommands = this.settings.get('ignorebotcommands')
 
-      if (text.indexOf('```') === -1 && this.settings.get('nazify') === true) {
+      if (text.indexOf('```') === -1 && ignoreBotCommands.map(ignoreBotCommand => text.indexOf(ignoreBotCommand) === -1).indexOf(false) == -1 && this.settings.get('nazify') === true) {
       if (this.settings.get('dictionary')) text = split.map(c => c in customDictionary ? customDictionary[c] : c).join(' ')
       if (this.settings.get('punctuation') && (/[a-z0-9]$/gmi).test(text) && split[split.length-1].indexOf('http') === -1 ) text += '.'
       if (this.settings.get('capitalization') && text.indexOf('http') != 0) text = text.charAt(0).toUpperCase() + text.substring(1)}
