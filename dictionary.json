@@ -1,12 +1,8 @@
-Note: If you want to add any values from this you must edit the "grammar-nazi.json" file located in 
-[PC Home Dir]/powercord/settings while discord is closed; discord must be closed for it to save.
 
-General
-    "i": "I",
+{
+	"i": "I",
     "lol": "LOL",
     "cuz": "because",
-
-Apothstrophe Words
     "doesnt": "doesn't",
     "cant": "can't",
     "wont": "won't",
@@ -29,8 +25,6 @@ Apothstrophe Words
     "wheres": "where's",
     "whos": "who's",
     "itll": "it'll",
-
-Extended Abreviations
     "imo": "in my opinion",
     "idk": "I don't know",
     "omg": "oh my god",
@@ -42,10 +36,5 @@ Extended Abreviations
     "smh": "shaking my head",
     "ty": "thank you",
     "tysm": "thank you so much",
-    "wtf": "what the fuck",
-
-Note: I wouldn't use any of the ones below but it's your dictionary
-    "lmao": "laughing my ass off",
-    "lmfao": "laughing my fucking ass off",
-    "rofl": "rolling on the floor laughing",
-    "lol": "laugh out loud",
+    "wtf": "what the fuck"
+}
