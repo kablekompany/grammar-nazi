@@ -110,12 +110,12 @@ module.exports = class GrammarNazi extends Plugin {
 
 	pluginWillUnload() {
 		powercord.api.settings.unregisterSettings('grammar-nazi')
-		powercord.api.commands.unregisterCommand('naziadd')
-		powercord.api.commands.unregisterCommand('naziremove')
-		powercord.api.commands.unregisterCommand('meinkampf')
+		powercord.api.commands.unregisterCommand('addword')
+		powercord.api.commands.unregisterCommand('rmword')
+		powercord.api.commands.unregisterCommand('listwords')
 		uninject('message-send')
 		uninject('toggle-button')
-		document.querySelectorAll('.toggle-button').forEach(e => e.style.display = 'none')
+		document.querySelectorAll('toggle-button').forEach(e => e.style.display = 'none')
 	}
 
 	async addDict(args) {
