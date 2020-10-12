@@ -35,7 +35,7 @@ module.exports = class Settings extends React.Component {
         </SwitchItem>
 				<TextInput
 					defaultValue={this.props.getSetting('ignoreBotPrefix', []).join(', ')}
-					onChange={u => this.props.updateSetting('ignoreBotPrefix', u.split(',').map(id => id.trim()))}
+					onChange={u => this.props.updateSetting('ignoreBotPrefix', u.split(',').map(id => id.trim()))} // * Thanks Gord for this snippet from Cutecord plugin settings panel */
 					note={
 						<p>
 							Seperate prefixes with commas and include spaces if they have them
