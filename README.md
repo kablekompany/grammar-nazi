@@ -50,7 +50,7 @@ If the plugin doesn't work make sure you have the settings you want enabled in t
 [issues-shield]: https://img.shields.io/github/issues/kablekompany/grammar-nazi.svg?style=flat-square
 [issues-url]: https://github.com/kablekompany/grammar-nazi/issues
 [license-shield]: https://img.shields.io/github/license/kablekompany/grammar-nazi.svg?style=flat-square
-[license-url]: https://github.com/kablekompany/grammar-nazi/blob/master/LICENSE.txt
+[license-url]: https://github.com/kablekompany/grammar-nazi/blob/master/LICENSE
 [KableKompany#0001]: https://img.shields.io/badge/-Discord-black.svg?style=flat-square&logo=discord&colorB=555
 [discord-server]: https://kable.lol/discord
 <!-- Mark down build up inspired by https://github.com/othneildrew/Best-README-Template ---->
