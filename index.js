@@ -64,7 +64,7 @@ module.exports = class GrammarNazi extends Plugin {
 
 			//Detect Bot Prefix
 			if (this.settings.get('ignorebots') === true) {
-				console.log(botPrefix)
+				let botPrefix = this.settings.get('ignoreBotPrefix', [])
 				for (let k = 0; k <= botPrefix.length; k++) {
 					botCmd = (text.startsWith(botPrefix[k])) ? true : false;
 					if (botCmd) {
