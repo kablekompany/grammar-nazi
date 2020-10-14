@@ -8,7 +8,8 @@ const ChannelTextAreaContainer = getModule((m) => m.type && m.type.render && m.t
 const Settings = require('./components/Settings')
 const spellButton = require('./components/ToggleButton')
 const customDefaultDictionary = require('./dictionary.json')
-const questionWords = ['who', 'what', 'when', 'where', 'why', 'how', 'can', 'who are', 'which', 'will', 'did']
+const questionPre = ['who', 'what', 'when', 'where', 'why', 'how', 'can', 'who are', 'which', 'will', 'did']
+const questionIn = ['how are']
 
 module.exports = class GrammarNazi extends Plugin {
 	async startPlugin() {
@@ -74,9 +75,25 @@ module.exports = class GrammarNazi extends Plugin {
 				}
 			}
 
+			let lowerText = text.toLowerCase()
 			//  Detect if message is a question
+			for (let k = 0; k < questionPre.length; k++) {
+				if (lowerText.startsWith(questionPre[k]) || lowerText.endsWith(questionPre[k])) {
+					punc = "?";
+				}
+			}
+
+			if (punc != "?") {
+				for (let k = 0; k < questionIn.length; k++) {
+					if (lowerText.includes(questionIn[k])) {
+						punc = "?";
+					}
+				}
+			}
+
+			/**
 			for (let k = 0; k < questionWords.length; k++) {
-				question = (text.toLowerCase().startsWith(questionWords[k])) ? true : false;
+				question = (text.toLowerCase().questionPre(questionWords[k])) ? true : false;
 				// text += '?'
 				if (question) {
 					punc = "?";
@@ -89,7 +106,8 @@ module.exports = class GrammarNazi extends Plugin {
 					// 	text = text.slice(0, text.length - 2) + "I?"; // Correct sentences like "Who am I?"
 				}
 			}// #TODO- add support for changing punctation on questions
-			
+			*/ 
+
 			// inject the message with corrections otherwise
 			if (text.indexOf('```') === -1) {
 				if (this.settings.get('dictionary')) text = split.map(c => c in customDictionary ? customDictionary[c] : c).join(' ')
