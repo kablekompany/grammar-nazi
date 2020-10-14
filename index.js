@@ -8,7 +8,8 @@ const ChannelTextAreaContainer = getModule((m) => m.type && m.type.render && m.t
 const Settings = require('./components/Settings')
 const spellButton = require('./components/ToggleButton')
 const customDefaultDictionary = require('./dictionary.json')
-const questionWords = ['who', 'what', 'when', 'where', 'why', 'how', 'can i', 'who are', 'which', 'will']
+const questionPre = ['who', 'what', 'when', 'where', 'why', 'how', 'can', 'who are', 'which', 'will', 'did']
+const questionIn = ['how are']
 
 module.exports = class GrammarNazi extends Plugin {
 	async startPlugin() {
@@ -53,29 +54,50 @@ module.exports = class GrammarNazi extends Plugin {
 		/* Inject on Message Send */
 		const MessageEvents = await getModule(['sendMessage'])
 		inject('message-send', MessageEvents, 'sendMessage', (args) => {
+			if (this.settings.get('nazify') === false) return args;
+
 			let text = args[1].content.trim()
 			let split = text.split(' ')
 			let customDictionary = this.settings.get('customDictionary')
 			var botCmd = false
 			var question = false
+			var punc = ".";
 
 			//Detect Bot Prefix
-			if (this.settings.get('ignorebots') === true && this.settings.get('nazify') === true) {
-				let botPrefix = this.settings.get('ignoreBotPrefix', []).join(', ')
-				for (let k = 0; k < botPrefix.length; k++) {
+			if (this.settings.get('ignorebots') === true) {
+				let botPrefix = this.settings.get('ignoreBotPrefix', [])
+				for (let k = 0; k <= botPrefix.length; k++) {
 					botCmd = (text.startsWith(botPrefix[k])) ? true : false;
 					if (botCmd) {
-						return;
+						console.log("Grammar injection ignored due to a bot prefix being detected.");
+						return args;
 					}
 				}
 			}
 
+			let lowerText = text.toLowerCase()
 			//  Detect if message is a question
+			for (let k = 0; k < questionPre.length; k++) {
+				if (lowerText.startsWith(questionPre[k]) || lowerText.endsWith(questionPre[k])) {
+					punc = "?";
+				}
+			}
+
+			if (punc != "?") {
+				for (let k = 0; k < questionIn.length; k++) {
+					if (lowerText.includes(questionIn[k])) {
+						punc = "?";
+					}
+				}
+			}
+
+			/**
 			for (let k = 0; k < questionWords.length; k++) {
-				question = (text.startsWith(questionWords[k])) ? true : false;
+				question = (text.toLowerCase().questionPre(questionWords[k])) ? true : false;
 				// text += '?'
 				if (question) {
-					return;
+					punc = "?";
+					// return;
 					// 	text = text.replace(/.$/, "?");
 					// } else {
 					// 	text = text + "?";
@@ -84,12 +106,16 @@ module.exports = class GrammarNazi extends Plugin {
 					// 	text = text.slice(0, text.length - 2) + "I?"; // Correct sentences like "Who am I?"
 				}
 			}// #TODO- add support for changing punctation on questions
+			*/ 
 
 			// inject the message with corrections otherwise
-			if (text.indexOf('```') === -1 && this.settings.get('nazify') === true) {
+			if (text.indexOf('```') === -1) {
 				if (this.settings.get('dictionary')) text = split.map(c => c in customDictionary ? customDictionary[c] : c).join(' ')
-				if (this.settings.get('punctuation') && (/[a-z0-9]$/gmi).test(text) && split[split.length - 1].indexOf('http') === -1) text += '.'
-				if (this.settings.get('capitalization') && text.indexOf('http') != 0) text = text.charAt(0).toUpperCase() + text.substring(1)
+				if (this.settings.get('punctuation') && (/[a-z0-9]$/gmi).test(text) && split[split.length - 1].indexOf('http') === -1) text += punc
+				if (this.settings.get('capitalization') && text.indexOf('http') != 0) {
+					text = text.charAt(0).toUpperCase() + text.substring(1)
+					text = text.replace(" i ", " I ")
+				};
 			}
 
 			args[1].content = text
